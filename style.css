@@ -1,9 +1,9 @@
-
 body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(to top, #6dd5ed, #2193b0);
     min-height: 100vh;
     color: #333;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .weather-card {
@@ -12,6 +12,7 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
 .main-weather-icon {
@@ -23,7 +24,7 @@ body {
     font-weight: 700;
 }
 
-.hourly-forecast-item, .daily-forecast-item {
+.hourly-forecast-item {
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: 1rem;
     padding: 1rem;
@@ -40,11 +41,18 @@ body {
 }
 
 .hourly-forecast-container::-webkit-scrollbar {
-    display: none;
+    height: 8px;
 }
+
+.hourly-forecast-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
 .hourly-forecast-container {
     -ms-overflow-style: none;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 .navbar-brand {
@@ -73,71 +81,133 @@ body {
 
 .accordion-button {
     background-color: transparent;
-    color: rgb(0, 0, 0);
+    color: #333;
     font-weight: 500;
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #6dd5ed7e;
-    color: rgb(0, 0, 0);
+    background-color: rgba(109, 213, 237, 0.5);
+    color: #333;
 }
 
 .accordion-button:focus {
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(33, 147, 176, 0.5);
 }
 
 .accordion-button::after {
-    filter: invert(1) grayscale(100%) brightness(200%);
+    filter: brightness(0.2);
 }
 
 .accordion-body {
-    color: #000000;
+    color: #333;
 }
 
-.hourly-forecast-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
+.aqi-gauge-container {
+    position: relative;
+    width: 220px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.aqi-gauge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 110px;
+    border-radius: 110px 110px 0 0;
+    background: conic-gradient(
+        from -90deg at 50% 100%,
+        #28a745 0deg 36deg,
+        #17a2b8 36deg 72deg,
+        #ffc107 72deg 108deg,
+        #fd7e14 108deg 144deg,
+        #dc3545 144deg 180deg
+    );
+    overflow: hidden;
+}
+
+.gauge-needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    height: 105px;
+    background-color: #333;
+    transform-origin: bottom center;
+    transition: transform 1s ease-in-out;
+    transform: translateX(-50%) rotate(0deg);
+    z-index: 2;
+}
+
+.gauge-center-circle {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background-color: #333;
+    border-radius: 50%;
+    z-index: 3;
+}
+
+.aqi-gauge-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    margin-top: -20px;
+}
+
+.progress {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out, background-color 0.5s;
+}
+
+.bg-good { background-color: #28a745 !important; }
+.bg-fair { background-color: #17a2b8 !important; }
+.bg-moderate { background-color: #ffc107 !important; }
+.bg-poor { background-color: #fd7e14 !important; }
+.bg-very-poor { background-color: #dc3545 !important; }
 
 body.dark {
-    background-color: #121212; /* Fundo do modo escuro */
-    background-image: none; /* Remove a imagem de fundo no modo escuro */
+    background: #1a2a3a;
     color: #e0e0e0;
 }
 
 body.dark .weather-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
+    background-color: rgba(23, 37, 51, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: #e0e0e0;
 }
 
-body.dark .main-weather-icon {
-    color: #4dabf7;
+body.dark .navbar {
+    background-color: rgba(15, 27, 39, 0.8) !important;
 }
 
 body.dark .hourly-forecast-item {
-    background-color: #2c2c2c;
+    background-color: #2c3e50;
 }
 
 body.dark .hourly-forecast-container::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
 }
 
-body.dark .navbar {
-    background-color: #1e1e1e !important; /* Força o fundo escuro sólido */
-}
-
-/* Estilos do Accordion para o Tema Escuro */
 body.dark .accordion-item {
-    background-color: #2c2c2c;
+    background-color: #2c3e50;
     border-color: #444;
 }
 body.dark .accordion-button {
-    background-color: transparent;
     color: #e0e0e0;
 }
 body.dark .accordion-button:not(.collapsed) {
-    background-color: #383838;
+    background-color: #34495e;
 }
 body.dark .accordion-button::after {
     filter: invert(1) grayscale(100%) brightness(200%);
@@ -145,3 +215,11 @@ body.dark .accordion-button::after {
 body.dark .accordion-body {
     color: #ccc;
 }
+body.dark .gauge-needle,
+body.dark .gauge-center-circle {
+    background-color: #e0e0e0;
+}
+body.dark .progress {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+

@@ -1,4 +1,4 @@
-const searchForm = document.querySelector("form");
+const searchForm = document.querySelector("#search-form-main");
 const cityInput = document.querySelector("input[type='search']");
 
 const cityNameElement = document.querySelector(".weather-card h1");
@@ -14,17 +14,25 @@ const dailyForecastContainer = document.querySelector("#daily-forecast-container
 const hourlyForecastContainer = document.querySelector(".hourly-forecast-container");
 
 const searchCity = async (city) => {
+    sessionStorage.setItem('lastSearchedCity', city);
+
     cityNameElement.textContent = "Carregando...";
+    dateElement.textContent = "";
     dailyForecastContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`; 
-    hourlyForecastContainer.innerHTML = "";
+    hourlyForecastContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    
     const location = await getCoordinates(city);
     if (location) {
         getWeatherData(location);
+    } else {
+        cityNameElement.textContent = "Cidade não encontrada";
+        hourlyForecastContainer.innerHTML = "";
+        dailyForecastContainer.innerHTML = "<p class='text-center'>Não foi possível encontrar dados para a cidade informada.</p>";
     }
 };
 
 const getCoordinates = async (city) => {
-    const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=pt&format=json`;
+    const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`;
     try {
         const response = await fetch(geocodeUrl);
         const data = await response.json();
@@ -32,10 +40,8 @@ const getCoordinates = async (city) => {
             throw new Error("Cidade não encontrada.");
         }
         const { latitude, longitude, name, admin1 } = data.results[0];
-        return { latitude, longitude, name, state: admin1 };
+        return { latitude, longitude, name, state: admin1 || '' };
     } catch (error) {
-        alert(error.message);
-        cityNameElement.textContent = "Erro ao buscar cidade";
         console.error(error);
         return null;
     }
@@ -47,79 +53,56 @@ const getWeatherData = async (location) => {
     try {
         const response = await fetch(weatherUrl);
         const data = await response.json();
-        console.log("Resposta da API:", data);
-
-        if (!data || (!data.current && !data.current_weather)) {
-            throw new Error("A resposta da API não contém os dados do clima atual.");
-        }
-        
         updateUI(data, location);
     } catch (error) {
-        alert("Ocorreu um erro ao buscar os dados do clima. Verifique o console.");
+        alert("Ocorreu um erro ao buscar os dados do clima.");
         console.error(error);
     }
 };
 
 const updateUI = (weatherData, locationData) => {
-    const currentSource = weatherData.current || weatherData.current_weather;
-
-    const current = {
-        temperature: currentSource.temperature_2m ?? currentSource.temperature,
-        apparent_temperature: currentSource.apparent_temperature,
-        humidity: currentSource.relative_humidity_2m,
-        pressure: currentSource.surface_pressure,
-        wind_speed: currentSource.wind_speed_10m ?? currentSource.windspeed,
-        weather_code: currentSource.weather_code ?? currentSource.weathercode
-    };
+    const current = weatherData.current;
     
     cityNameElement.textContent = `${locationData.name}, ${locationData.state}`;
     const now = new Date();
     dateElement.textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-    temperatureElement.textContent = `${Math.round(current.temperature)}°C`;
+    temperatureElement.textContent = `${Math.round(current.temperature_2m)}°C`;
     descriptionElement.textContent = getWeatherDescription(current.weather_code);
-    feelsLikeElement.textContent = `${Math.round(current.apparent_temperature ?? current.temperature)}°C`;
-    humidityElement.textContent = `${current.humidity ?? '- '}%`;
-    windElement.textContent = `${(current.wind_speed ?? 0).toFixed(1)} km/h`;
-    pressureElement.textContent = `${Math.round(current.pressure ?? 0)} hPa`;
+    feelsLikeElement.textContent = `${Math.round(current.apparent_temperature)}°C`;
+    humidityElement.textContent = `${current.relative_humidity_2m}%`;
+    windElement.textContent = `${current.wind_speed_10m.toFixed(1)} km/h`;
+    pressureElement.textContent = `${Math.round(current.surface_pressure)} hPa`;
     mainIconElement.className = `bi ${getWeatherIcon(current.weather_code)} main-weather-icon me-4`;
 
     updateDailyForecast(weatherData.daily);
     updateHourlyForecast(weatherData.hourly);
 };
 
-
 const updateHourlyForecast = (hourly) => {
     hourlyForecastContainer.innerHTML = "";
-    if (!hourly || !hourly.time) return;
-
     const now = new Date();
-    
     const startIndex = hourly.time.findIndex(time => new Date(time) > now);
-
     if (startIndex === -1) return; 
 
-    for (let i = startIndex; i < startIndex + 10 && i < hourly.time.length; i++) {
+    for (let i = startIndex; i < startIndex + 12 && i < hourly.time.length; i++) {
         const date = new Date(hourly.time[i]);
         const hour = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         const temp = Math.round(hourly.temperature_2m[i]);
         const iconClass = getWeatherIcon(hourly.weather_code[i]);
 
-        const hourlyItemHTML = `
+        hourlyForecastContainer.innerHTML += `
             <div class="hourly-forecast-item">
                 <p class="mb-1">${hour}</p>
                 <i class="bi ${iconClass} fs-2"></i>
                 <p class="fw-bold fs-5 mb-0">${temp}°C</p>
             </div>
         `;
-        hourlyForecastContainer.innerHTML += hourlyItemHTML;
     }
 };
 
 const updateDailyForecast = (daily) => {
     dailyForecastContainer.innerHTML = "";
-    if (!daily || !daily.time) return;
-
     for (let i = 1; i < 6 && i < daily.time.length; i++) {
         const date = new Date(daily.time[i] + "T00:00:00");
         const dayOfWeek = date.toLocaleDateString('pt-BR', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase());
@@ -135,7 +118,7 @@ const updateDailyForecast = (daily) => {
 
         const collapseId = `collapse-${i}`;
 
-        const forecastItemHTML = `
+        dailyForecastContainer.innerHTML += `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
@@ -166,7 +149,6 @@ const updateDailyForecast = (daily) => {
                 </div>
             </div>
         `;
-        dailyForecastContainer.innerHTML += forecastItemHTML;
     }
 };
 
@@ -205,7 +187,6 @@ const themeToggleButton = document.getElementById('theme-toggle');
 const themeToggleIcon = themeToggleButton.querySelector('i');
 const body = document.body;
 
-// Função para aplicar o tema (claro ou escuro)
 const applyTheme = (theme) => {
     if (theme === 'dark') {
         body.classList.add('dark');
@@ -216,26 +197,17 @@ const applyTheme = (theme) => {
     }
 };
 
-// Evento de clique no botão
 themeToggleButton.addEventListener('click', () => {
-    // Verifica se o corpo JÁ TEM a classe 'dark'
     const isDarkMode = body.classList.contains('dark');
-    // Se tiver, o novo tema será 'light', senão, será 'dark'
     const newTheme = isDarkMode ? 'light' : 'dark';
-    
-    // Aplica o novo tema
     applyTheme(newTheme);
-    // Salva a preferência no armazenamento local do navegador
     localStorage.setItem('theme', newTheme);
 });
 
-
-// Verifica se há um tema salvo no localStorage quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega o tema salvo ou usa 'light' como padrão
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
     
-    // Mantém a busca inicial pela cidade
-    searchCity("Presidente Prudente");
+    const lastCity = sessionStorage.getItem('lastSearchedCity') || "Presidente Prudente";
+    searchCity(lastCity);
 });
