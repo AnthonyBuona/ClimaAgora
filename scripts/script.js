@@ -12,13 +12,14 @@ const windElement = document.querySelector("#wind");
 const pressureElement = document.querySelector("#pressure");
 const dailyForecastContainer = document.querySelector("#daily-forecast-container");
 const hourlyForecastContainer = document.querySelector(".hourly-forecast-container");
+const animationBg = document.getElementById('animation-bg');
 
 const searchCity = async (city) => {
     sessionStorage.setItem('lastSearchedCity', city);
 
     cityNameElement.textContent = "Carregando...";
     dateElement.textContent = "";
-    dailyForecastContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`; 
+    dailyForecastContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center p-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
     hourlyForecastContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
     
     const location = await getCoordinates(city);
@@ -48,7 +49,7 @@ const getCoordinates = async (city) => {
 };
 
 const getWeatherData = async (location) => {
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,surface_pressure,wind_speed_10m&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto`;
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,surface_pressure,wind_speed_10m&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto`;
 
     try {
         const response = await fetch(weatherUrl);
@@ -77,13 +78,29 @@ const updateUI = (weatherData, locationData) => {
 
     updateDailyForecast(weatherData.daily);
     updateHourlyForecast(weatherData.hourly);
+    updateBackground(current.weather_code, current.is_day);
+};
+
+const updateBackground = (code, isDay) => {
+    animationBg.className = '';
+
+    const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code);
+    const isClear = [0, 1].includes(code);
+
+    if (isRain) {
+        animationBg.classList.add('rain');
+    } else if (isClear && isDay) {
+        animationBg.classList.add('sunny');
+    } else if (isClear && !isDay) {
+        animationBg.classList.add('stars');
+    }
 };
 
 const updateHourlyForecast = (hourly) => {
     hourlyForecastContainer.innerHTML = "";
     const now = new Date();
     const startIndex = hourly.time.findIndex(time => new Date(time) > now);
-    if (startIndex === -1) return; 
+    if (startIndex === -1) return;
 
     for (let i = startIndex; i < startIndex + 12 && i < hourly.time.length; i++) {
         const date = new Date(hourly.time[i]);
