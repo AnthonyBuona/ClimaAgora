@@ -4,6 +4,7 @@ const dateInput = searchForm.querySelector("#date-input");
 const cityNameElement = document.querySelector("#city-name");
 const selectedDateElement = document.querySelector("#selected-date");
 const container = document.querySelector("#historical-data-container");
+let historicalChart = null;
 
 const searchHistoricalWeather = async (city, date) => {
     sessionStorage.setItem('lastSearchedCity', city);
@@ -15,7 +16,7 @@ const searchHistoricalWeather = async (city, date) => {
         getHistoricalData(location, date);
     } else {
         cityNameElement.textContent = "Cidade não encontrada";
-        container.innerHTML = "<p>Não foi possível encontrar dados para a cidade informada.</p>";
+        container.innerHTML = "<p class='text-center'>Não foi possível encontrar dados para a cidade informada.</p>";
     }
 };
 
@@ -36,7 +37,7 @@ const getCoordinates = async (city) => {
 };
 
 const getHistoricalData = async (location, date) => {
-    const historicalUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=${location.latitude}&longitude=${location.longitude}&start_date=${date}&end_date=${date}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&wind_speed_unit=kmh&timezone=auto`;
+    const historicalUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=${location.latitude}&longitude=${location.longitude}&start_date=${date}&end_date=${date}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m&wind_speed_unit=kmh&timezone=auto`;
 
     try {
         const response = await fetch(historicalUrl);
@@ -49,13 +50,13 @@ const getHistoricalData = async (location, date) => {
         alert(error.message);
         console.error(error);
         cityNameElement.textContent = `${location.name}, ${location.state}`;
-        container.innerHTML = `<p>Não foram encontrados dados históricos para a data selecionada.</p>`;
+        container.innerHTML = `<p class='text-center'>Não foram encontrados dados históricos para a data selecionada.</p>`;
     }
 };
 
 const updateHistoricalUI = (data, location, date) => {
     cityNameElement.textContent = `${location.name}, ${location.state}`;
-    const formattedDate = new Date(date + "T00:00:00").toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const formattedDate = new Date(date + "T00:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     selectedDateElement.textContent = formattedDate;
 
     const daily = data.daily;
@@ -65,36 +66,150 @@ const updateHistoricalUI = (data, location, date) => {
     const minTemp = Math.round(daily.temperature_2m_min[0]);
     const precipitation = daily.precipitation_sum[0].toFixed(1);
     const wind = daily.wind_speed_10m_max[0].toFixed(1);
+    const sunrise = new Date(daily.sunrise[0]).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const sunset = new Date(daily.sunset[0]).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     container.innerHTML = `
-        <div class="row align-items-center">
-            <div class="col-md-4 text-center mb-4 mb-md-0">
+        <div class="row align-items-center mb-4">
+            <div class="col-lg-4 text-center mb-4 mb-lg-0">
                 <i class="bi ${iconClass} display-1"></i>
-                <p class="fs-4 mt-2">${description}</p>
+                <p class="fs-4 mt-2 mb-0">${description}</p>
             </div>
-            <div class="col-md-8">
+            <div class="col-lg-8">
                 <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <p class="mb-1">Máxima</p>
-                        <p class="fw-bold fs-3 mb-0">${maxTemp}°C</p>
+                    <div class="col-6 col-sm-3 mb-3">
+                        <p class="mb-1"><i class="bi bi-thermometer-high me-1"></i> Máx.</p>
+                        <p class="fw-bold fs-4 mb-0">${maxTemp}°C</p>
                     </div>
-                    <div class="col-6 mb-3">
-                        <p class="mb-1">Mínima</p>
-                        <p class="fw-bold fs-3 mb-0">${minTemp}°C</p>
+                    <div class="col-6 col-sm-3 mb-3">
+                        <p class="mb-1"><i class="bi bi-thermometer-low me-1"></i> Mín.</p>
+                        <p class="fw-bold fs-4 mb-0">${minTemp}°C</p>
+                    </div>
+                    <div class="col-6 col-sm-3 mb-3">
+                        <p class="mb-1"><i class="bi bi-cloud-drizzle-fill me-1"></i> Chuva</p>
+                        <p class="fw-bold fs-4 mb-0">${precipitation} mm</p>
+                    </div>
+                    <div class="col-6 col-sm-3 mb-3">
+                        <p class="mb-1"><i class="bi bi-wind me-1"></i> Vento</p>
+                        <p class="fw-bold fs-4 mb-0">${wind} km/h</p>
+                    </div>
+                     <div class="col-6">
+                        <p class="mb-1"><i class="bi bi-sunrise-fill me-1"></i> Nascer do Sol</p>
+                        <p class="fw-bold fs-5 mb-0">${sunrise}</p>
                     </div>
                     <div class="col-6">
-                        <p class="mb-1">Precipitação</p>
-                        <p class="fw-bold fs-3 mb-0">${precipitation} mm</p>
-                    </div>
-                    <div class="col-6">
-                        <p class="mb-1">Vento Máx.</p>
-                        <p class="fw-bold fs-3 mb-0">${wind} km/h</p>
+                        <p class="mb-1"><i class="bi bi-sunset-fill me-1"></i> Pôr do Sol</p>
+                        <p class="fw-bold fs-5 mb-0">${sunset}</p>
                     </div>
                 </div>
             </div>
         </div>
+        <hr>
+        <h5 class="text-center my-4">Temperatura ao Longo do Dia</h5>
+        <div class="chart-container">
+            <canvas id="historical-chart"></canvas>
+        </div>
     `;
+
+    renderChart(data.hourly);
 };
+
+const renderChart = (hourlyData) => {
+    const ctx = document.getElementById('historical-chart').getContext('2d');
+    const labels = hourlyData.time.map(t => new Date(t).getHours() + 'h');
+    const temperatures = hourlyData.temperature_2m.map(temp => Math.round(temp));
+
+    const isDark = document.body.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const fontColor = isDark ? '#e0e0e0' : '#333';
+    const pointColor = isDark ? '#6dd5ed' : '#2193b0';
+    const pointBorderColor = isDark ? '#1a2a3a' : '#ffffff';
+
+    if (historicalChart) {
+        historicalChart.destroy();
+    }
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    if (isDark) {
+        gradient.addColorStop(0, 'rgba(109, 213, 237, 0.5)');
+        gradient.addColorStop(1, 'rgba(109, 213, 237, 0)');
+    } else {
+        gradient.addColorStop(0, 'rgba(33, 147, 176, 0.5)');
+        gradient.addColorStop(1, 'rgba(33, 147, 176, 0)');
+    }
+
+    historicalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Temperatura',
+                data: temperatures,
+                fill: true,
+                borderColor: pointColor,
+                backgroundColor: gradient,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: pointColor,
+                pointBorderColor: pointBorderColor,
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: pointColor,
+                pointHoverBorderColor: pointBorderColor
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: isDark ? 'rgba(20, 35, 49, 0.85)' : 'rgba(255,255,255,0.9)',
+                    titleColor: fontColor,
+                    bodyColor: fontColor,
+                    borderColor: pointColor,
+                    borderWidth: 1,
+                    cornerRadius: 10,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: (context) => `Às ${context[0].label}`,
+                        label: (context) => `Temperatura: ${context.parsed.y}°C`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    grid: {
+                        color: gridColor,
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: fontColor,
+                        padding: 10,
+                        callback: (value) => value + '°C'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                     ticks: {
+                        color: fontColor,
+                        padding: 10,
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 12
+                    }
+                }
+            }
+        }
+    });
+}
 
 const getWeatherDescription = (code) => {
     const descriptions = {
@@ -152,6 +267,10 @@ themeToggleButton.addEventListener('click', () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
     applyTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    
+    if (cityInput.value.trim() && dateInput.value) {
+       searchHistoricalWeather(cityInput.value.trim(), dateInput.value);
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -166,5 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const lastCity = sessionStorage.getItem('lastSearchedCity') || "Presidente Prudente";
     cityInput.value = lastCity;
+
+    if(lastCity && dateInput.value) {
+        searchHistoricalWeather(lastCity, dateInput.value);
+    }
 });
 

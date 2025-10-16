@@ -4,6 +4,12 @@ body {
     min-height: 100vh;
     color: #333;
     transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
 }
 
 .weather-card {
@@ -176,6 +182,17 @@ body {
 .bg-poor { background-color: #fd7e14 !important; }
 .bg-very-poor { background-color: #dc3545 !important; }
 
+.chart-container {
+    position: relative;
+    height: 320px;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 body.dark {
     background: #1a2a3a;
     color: #e0e0e0;
@@ -223,3 +240,7 @@ body.dark .progress {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+body.dark .chart-container {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.05);
+}
