@@ -1,0 +1,147 @@
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to top, #6dd5ed, #2193b0);
+    min-height: 100vh;
+    color: #333;
+}
+
+.weather-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.main-weather-icon {
+    font-size: 6rem;
+}
+
+.main-temp {
+    font-size: 5rem;
+    font-weight: 700;
+}
+
+.hourly-forecast-item, .daily-forecast-item {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    padding: 1rem;
+    text-align: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hourly-forecast-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 1rem;
+}
+
+.hourly-forecast-container::-webkit-scrollbar {
+    display: none;
+}
+.hourly-forecast-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+.form-control {
+    border-radius: 2rem;
+}
+
+.btn-primary {
+     border-radius: 2rem;
+     background-color: #2193b0;
+     border-color: #2193b0;
+}
+
+.btn-primary:hover {
+    background-color: #1c7a91;
+    border-color: #1c7a91;
+}
+
+.accordion-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.accordion-button {
+    background-color: transparent;
+    color: rgb(0, 0, 0);
+    font-weight: 500;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #6dd5ed7e;
+    color: rgb(0, 0, 0);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5);
+}
+
+.accordion-button::after {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.accordion-body {
+    color: #000000;
+}
+
+.hourly-forecast-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+body.dark {
+    background-color: #121212; /* Fundo do modo escuro */
+    background-image: none; /* Remove a imagem de fundo no modo escuro */
+    color: #e0e0e0;
+}
+
+body.dark .weather-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    color: #e0e0e0;
+}
+
+body.dark .main-weather-icon {
+    color: #4dabf7;
+}
+
+body.dark .hourly-forecast-item {
+    background-color: #2c2c2c;
+}
+
+body.dark .hourly-forecast-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark .navbar {
+    background-color: #1e1e1e !important; /* Força o fundo escuro sólido */
+}
+
+/* Estilos do Accordion para o Tema Escuro */
+body.dark .accordion-item {
+    background-color: #2c2c2c;
+    border-color: #444;
+}
+body.dark .accordion-button {
+    background-color: transparent;
+    color: #e0e0e0;
+}
+body.dark .accordion-button:not(.collapsed) {
+    background-color: #383838;
+}
+body.dark .accordion-button::after {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+body.dark .accordion-body {
+    color: #ccc;
+}
