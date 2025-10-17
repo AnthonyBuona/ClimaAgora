@@ -147,13 +147,15 @@ const updateBackgroundFromStorage = () => {
     const isSkyVisible = [0, 1, 2, 3].includes(code);
     const isWindy = windSpeed > 15;
     const isNight = isDay === 0;
+    const isDarkMode = document.body.classList.contains('dark');
+
     if (isRain) {
         animationBgAq.classList.add('rain');
-    } else if (isSkyVisible && isNight) {
+    } else if (isSkyVisible && !isDarkMode) {
+        animationBgAq.classList.add('sunny');
+    } else if (isSkyVisible && isDarkMode) {
         animationBgAq.classList.add('stars');
         generateStarLayersAq();
-    } else if (isSkyVisible && !isNight) {
-        animationBgAq.classList.add('sunny');
     } else if (isWindy) {
         animationBgAq.classList.add('windy');
     }
@@ -195,4 +197,3 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastCity = sessionStorage.getItem('lastSearchedCity') || "Presidente Prudente";
     searchCityAq(lastCity);
 });
-

@@ -107,14 +107,15 @@ const updateBackground = (code, windSpeed, isDay) => {
     const isSkyVisible = [0, 1, 2, 3].includes(code);
     const isWindy = windSpeed > 15;
     const isNight = isDay === 0;
+    const isDarkMode = document.body.classList.contains('dark');
 
     if (isRain) {
         animationBg.classList.add('rain');
-    } else if (isSkyVisible && isNight) {
+    } else if (isSkyVisible && !isDarkMode) {
+        animationBg.classList.add('sunny');
+    } else if (isSkyVisible && isDarkMode) {
         animationBg.classList.add('stars');
         generateStarLayers();
-    } else if (isSkyVisible && !isNight) {
-        animationBg.classList.add('sunny');
     } else if (isWindy) {
         animationBg.classList.add('windy');
     }
@@ -235,4 +236,3 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastCity = sessionStorage.getItem('lastSearchedCity') || "Presidente Prudente";
     searchCity(lastCity);
 });
-

@@ -211,13 +211,15 @@ const updateBackgroundFromStorageHist = () => {
     const isSkyVisible = [0, 1, 2, 3].includes(code);
     const isWindy = windSpeed > 15;
     const isNight = isDay === 0;
+    const isDarkMode = document.body.classList.contains('dark');
+
     if (isRain) {
         animationBgHist.classList.add('rain');
-    } else if (isSkyVisible && isNight) {
+    } else if (isSkyVisible && !isDarkMode) {
+        animationBgHist.classList.add('sunny');
+    } else if (isSkyVisible && isDarkMode) {
         animationBgHist.classList.add('stars');
         generateStarLayersHist();
-    } else if (isSkyVisible && !isNight) {
-        animationBgHist.classList.add('sunny');
     } else if (isWindy) {
         animationBgHist.classList.add('windy');
     }
@@ -273,4 +275,3 @@ document.addEventListener('DOMContentLoaded', () => {
         searchHistoricalWeather(lastCity, dateInput.value);
     }
 });
-
