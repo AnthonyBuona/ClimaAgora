@@ -12,7 +12,11 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-    <div id="animation-bg"></div>
+    <div id="animation-bg">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-25">
         <div class="container">
             <a class="navbar-brand" href="index.html">
@@ -51,13 +55,13 @@
         <div class="card weather-card p-4 mb-4">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <h1 class="display-5">Presidente Prudente, SP</h1>
-                    <p class="lead">Quinta-feira, 16 de Outubro</p>
+                    <h1 class="display-5">Carregando...</h1>
+                    <p class="lead">...</p>
                     <div class="d-flex align-items-center justify-content-center justify-content-md-start">
-                        <i class="bi bi-cloud-sun-fill main-weather-icon me-4"></i>
+                        <i class="bi main-weather-icon me-4"></i>
                         <div>
-                            <span class="main-temp">-°C</span>
-                            <p class="fs-4 mb-0">-</p>
+                            <span class="main-temp">--°C</span>
+                            <p class="fs-4 mb-0">...</p>
                         </div>
                     </div>
                 </div>
@@ -66,22 +70,22 @@
                         <div class="col-6 mb-3">
                             <i class="bi bi-thermometer-half fs-3"></i>
                             <p class="mb-0">Sensação Térmica</p>
-                            <p id="feels-like" class="fw-bold fs-5">-</p>
+                            <p id="feels-like" class="fw-bold fs-5">--°C</p>
                         </div>
                         <div class="col-6 mb-3">
                             <i class="bi bi-droplet-fill fs-3"></i>
                             <p class="mb-0">Umidade</p>
-                            <p id="humidity" class="fw-bold fs-5">-</p>
+                            <p id="humidity" class="fw-bold fs-5">--%</p>
                         </div>
                         <div class="col-6">
                             <i class="bi bi-wind fs-3"></i>
                             <p class="mb-0">Vento</p>
-                            <p id="wind" class="fw-bold fs-5">-</p>
+                            <p id="wind" class="fw-bold fs-5">-- km/h</p>
                         </div>
                         <div class="col-6">
                             <i class="bi bi-speedometer2 fs-3"></i>
                             <p class="mb-0">Pressão</p>
-                            <p id="pressure" class="fw-bold fs-5">-</p>
+                            <p id="pressure" class="fw-bold fs-5">-- hPa</p>
                         </div>
                     </div>
                 </div>
@@ -90,25 +94,15 @@
 
         <div class="card weather-card p-4 mb-4">
             <h5 class="mb-3">Previsão por hora</h5>
-            <div class="hourly-forecast-container d-flex justify-content-center p-3">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
+            <div class="hourly-forecast-container"></div>
         </div>
 
         <div class="card weather-card p-4">
             <h5 class="mb-3">Próximos 5 dias</h5>
-            <div class="accordion" id="daily-forecast-container">
-                <div class="d-flex justify-content-center align-items-center p-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </div>
+            <div class="accordion" id="daily-forecast-container"></div>
         </div>
     </main>
-
+    
     <footer class="text-center text-white py-3 mt-4">
         <p>&copy; 2025 Clima Agora.</p>
     </footer>
